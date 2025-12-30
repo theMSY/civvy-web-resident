@@ -95,20 +95,36 @@ The application expects the following backend endpoints:
 
 ## Docker Deployment
 
-### Build Docker Image
+### Option 1: Local Build + Docker (Recommended)
+
+This approach builds the application locally and then creates a Docker image with the built files.
 
 ```bash
-docker build -t civvy-web-resident .
-```
+# 1. Build the application locally
+npm run build
 
-### Run Container
+# 2. Build Docker image (using Dockerfile.local)
+# Temporarily bypass .dockerignore to include dist/
+mv .dockerignore .dockerignore.tmp
+docker build -f Dockerfile.local -t civvy-web-resident .
+mv .dockerignore.tmp .dockerignore
 
-```bash
+# 3. Run container
 docker run -d \
   -p 8080:80 \
   -e API_BASE_URL="" \
   -e MAP_TILE_URL="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" \
   civvy-web-resident
+```
+
+### Option 2: Multi-Stage Build (Experimental)
+
+This approach builds everything inside Docker using a multi-stage build.
+
+**Note**: Some environments may experience issues with `npm install` in Alpine Linux. If you encounter build errors, use Option 1 instead.
+
+```bash
+docker build -t civvy-web-resident .
 ```
 
 ### Environment Variables
